@@ -18,10 +18,47 @@ from helpers import LuigiTestCase, RunOnceTask
 
 import luigi
 import luigi.task
-from luigi.util import inherits, requires
+from luigi.util import common_params, inherits, requires
 
 
 class BasicsTest(LuigiTestCase):
+
+    def test_common_params(self):
+        class TaskA(luigi.Task):
+            x = luigi.IntParameter()
+            y = luigi.IntParameter()
+
+        class TaskB(luigi.Task):
+            x = luigi.IntParameter()
+            z = luigi.IntParameter()
+
+        task_b = TaskB(x=1, z=1)
+        common = list(common_params(task_b, TaskA).items())
+
+        self.assertEqual(len(common), 1)
+        self.assertEqual(common[0], ("x", 1))
+
+    def test_common_params_choices(self):
+        class TaskA(luigi.Task):
+            param = luigi.ChoiceParameter(choices=["a"], default="a")
+
+        class TaskB(luigi.Task):
+            param = luigi.ChoiceParameter(choices=["a", "b"], default="a")
+
+        # instantiate TaskA and compare to TaskB
+        # TaskA.param.choices is a subset of TaskB.param.choices
+        task_a = TaskA(param="a")
+        common = list(common_params(task_a, TaskB).items())
+        self.assertEqual(len(common), 1)
+        self.assertEqual(common[0], ("param", "a"))
+
+        # instantiate TaskB and compare to TaskA
+        # use param "b" which is not contained in TaskA.param.choices
+        task_b = TaskB(param="b")
+        common = list(common_params(task_b, TaskA).items())
+        self.assertEqual(len(common), 1)
+        self.assertEqual(common[0], ("param", "b"))
+
     # following tests using inherits decorator
     def test_task_ids_using_inherits(self):
         class ParentTask(luigi.Task):
