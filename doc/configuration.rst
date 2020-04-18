@@ -828,6 +828,12 @@ metrics_collector
   collector that acts as a shell and does nothing. The currently available
   options are "datadog" and "prometheus".
 
+worker_columns
+  An order-independent enumeration list controlling which columns are shown in
+  the workers list of the central scheduler. Possible values are "name",
+  "priority", "resources", "time", and "actions". By default, all columns are
+  shown.
+
 
 [sendgrid]
 ----------

@@ -19,7 +19,7 @@ from __future__ import division
 import os
 import tempfile
 import time
-from helpers import unittest, RunOnceTask
+from helpers import unittest, RunOnceTask, with_config
 
 import luigi
 import luigi.notifications
@@ -593,3 +593,16 @@ class SchedulerVisualisationTest(unittest.TestCase):
             self.assertEqual(1, len(workers))
             self.assertEqual(1, len(workers))
             self.assertEqual('disabled', workers[0]['state'])
+
+    @with_config({'scheduler': {'worker_columns': 'name,time'}})
+    def test_scheduler_worker_columns(self):
+        class X(RunOnceTask):
+            pass
+
+        s = luigi.scheduler.Scheduler()
+        with luigi.worker.Worker(worker_id='w', scheduler=s) as w:
+            w.add(X())
+            workers = s.worker_list()
+            self.assertEqual(1, len(workers))
+            for name, flag in workers[0]["worker_columns"].items():
+                self.assertEqual(flag, name in ["name", "time"])

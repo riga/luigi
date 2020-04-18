@@ -211,20 +211,21 @@
                     <hr>
                     <table class="table table-striped worker-table">
                       <thead>
-                        <th>Name</th>
-                        <th>Priority</th>
-                        <th>Resources</th>
-                        <th>Time</th>
-                        <th>Actions</th>
+                        {{#worker_columns.name}}<th>Name</th>{{/worker_columns.name}}
+                        {{#worker_columns.priority}}<th>Priority</th>{{/worker_columns.priority}}
+                        {{#worker_columns.resources}}<th>Resources</th>{{/worker_columns.resources}}
+                        {{#worker_columns.time}}<th>Time</th>{{/worker_columns.time}}
+                        {{#worker_columns.actions}}<th>Actions</th>{{/worker_columns.actions}}
                       </thead>
                       <tbody>
                       {{#tasks}}
                       <tr>
-                        <td>{{displayName}}</td>
-                        <td>{{priority}}</td>
-                        <td>{{resources}}</td>
-                        <td>{{displayTime}}</td>
-                        <td><a href="#tab=graph&taskId={{encodedTaskId}}" class="btn btn-info btn-xs" title="View graph" data-toggle="tooltip" data-action="drawGraph"><i class="fa fa-sitemap"/></a>
+                        {{#worker_columns.name}}<td>{{displayName}}</td>{{/worker_columns.name}}
+                        {{#worker_columns.priority}}<td>{{priority}}</td>{{/worker_columns.priority}}
+                        {{#worker_columns.resources}}<td>{{resources}}</td>{{/worker_columns.resources}}
+                        {{#worker_columns.time}}<td>{{displayTime}}</td>{{/worker_columns.time}}
+                        {{#worker_columns.actions}}<td>
+                          <a href="#tab=graph&taskId={{encodedTaskId}}" class="btn btn-info btn-xs" title="View graph" data-toggle="tooltip" data-action="drawGraph"><i class="fa fa-sitemap"/></a>
                           {{#trackingUrl}}<a target="_blank" href="{{trackingUrl}}" class="btn btn-primary btn-xs" title="Track Progress" data-toggle="tooltip"><i class="fa fa-eye"></i></a>{{/trackingUrl}}
                           {{#statusMessage}}<button class="btn btn-primary btn-xs statusMessage" title="Status message" data-toggle="tooltip" data-task-id="{{taskId}}" data-display-name="{{displayName}}"><i class="fa fa-comment"></i></button>{{/statusMessage}}
                           {{^statusMessage}}
@@ -233,7 +234,7 @@
                           {{/statusMessage}}
                           {{#acceptsMessages}}<button class="btn btn-success btn-xs schedulerMessage" title="Send message" data-toggle="tooltip" data-task-id="{{taskId}}" data-display-name="{{displayName}}" data-worker="{{workerIdRunning}}"><i class="fa fa-paper-plane"></i></button>
                           {{/acceptsMessages}}
-                        </td>
+                        </td>{{/worker_columns.actions}}
                       </tr>
                       {{/tasks}}
                       {{/num_running}}

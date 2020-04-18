@@ -42,6 +42,7 @@ import os
 import re
 import time
 import uuid
+from enum import Enum
 
 from luigi import six
 
@@ -127,6 +128,17 @@ def rpc_method(**request_args):
     return _rpc_method
 
 
+class WorkerColumns(Enum):
+    name = 'name'
+    priority = 'priority'
+    resources = 'resources'
+    time = 'time'
+    actions = 'actions'
+
+
+default_worker_columns = tuple(WorkerColumns.__members__.values())
+
+
 class scheduler(Config):
     retry_delay = parameter.FloatParameter(default=900.0)
     remove_delay = parameter.FloatParameter(default=600.0)
@@ -153,6 +165,8 @@ class scheduler(Config):
     send_messages = parameter.BoolParameter(default=True)
 
     metrics_collector = parameter.EnumParameter(enum=MetricsCollectors, default=MetricsCollectors.default)
+
+    worker_columns = parameter.EnumListParameter(enum=WorkerColumns, default=default_worker_columns)
 
     stable_done_cooldown_secs = parameter.IntParameter(default=10,
                                                        description="Sets cooldown period to avoid running the same task twice")
@@ -724,6 +738,11 @@ class Scheduler(object):
             self._email_batcher = BatchNotifier()
 
         self._state._metrics_collector = MetricsCollectors.get(self._config.metrics_collector)
+
+        self._worker_column_flags = {
+            c.name: (c in self._config.worker_columns)
+            for c in WorkerColumns.__members__.values()
+        }
 
     def load(self):
         self._state.load()
@@ -1498,6 +1517,7 @@ class Scheduler(object):
                 state=worker.state,
                 first_task_display_name=self._first_task_display_name(worker),
                 num_unread_rpc_messages=len(worker.rpc_messages),
+                worker_columns=self._worker_column_flags,
                 **worker.info
             ) for worker in self._state.get_active_workers()]
         workers.sort(key=lambda worker: worker['started'], reverse=True)
